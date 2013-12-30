@@ -1,6 +1,7 @@
 package com.hlops.tasker.impl;
 
 import com.hlops.tasker.QueueService;
+import com.hlops.tasker.task.CacheableTask;
 import com.hlops.tasker.task.Task;
 import com.hlops.tasker.task.impl.PrioritizedTaskImpl;
 import com.hlops.tasker.task.impl.TaskImpl;
@@ -81,8 +82,7 @@ public class QueueServiceImplTest extends Assert {
             futures[i] = queueService.executeTask(task);
         }
 
-        for (int i = 0; i < futures.length; i++) {
-            @SuppressWarnings({"unchecked"}) Future<String> future = futures[i];
+        for (Future future : futures) {
             assertNotNull(future);
             assertEquals("ok", future.get());
         }
@@ -125,14 +125,36 @@ public class QueueServiceImplTest extends Assert {
             futures[i] = queueService.executeTask(task);
         }
 
-        for (int i = 0; i < futures.length; i++) {
-            @SuppressWarnings({"unchecked"}) Future<String> future = futures[i];
+        for (Future future : futures) {
             assertNotNull(future);
             assertEquals("ok", future.get());
         }
 
         if (!isOk.get()) {
             fail();
+        }
+    }
+
+    @Test
+    public void testCacheableTask() throws Exception {
+        Future[] futures = new Future[100];
+        for (int i = 0; i < futures.length; i++) {
+            Task<Long> task = new MyCacheableTaskImpl<Long>() {
+                public Long call() throws Exception {
+                    return System.nanoTime();
+                }
+            };
+            futures[i] = queueService.executeTask(task);
+        }
+
+        long time = 0;
+        for (Future future : futures) {
+            assertNotNull(future);
+            if (time == 0) {
+                time = (Long) future.get();
+            } else {
+                assertEquals(time, future.get());
+            }
         }
     }
 
@@ -148,5 +170,17 @@ public class QueueServiceImplTest extends Assert {
         public int getId() {
             return id;
         }
+    }
+
+    abstract class MyCacheableTaskImpl<T> extends TaskImpl<T> implements CacheableTask<T> {
+
+        public Object getId() {
+            return "uniqueId";
+        }
+
+        public long getAliveTime() {
+            return 1000;
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 package com.hlops.tasker.task.impl;
 
-import com.hlops.tasker.task.PrioritizedTask;
 import com.hlops.tasker.task.Task;
 
 /**
@@ -9,7 +8,7 @@ import com.hlops.tasker.task.Task;
  * Date: 12/30/13
  * Time: 2:58 PM
  */
-public abstract class PrioritizedTaskImpl<T> extends TaskImpl<T> implements PrioritizedTask<T> {
+public abstract class PrioritizedTaskImpl<T> extends TaskImpl<T> {
 
     private int priority;
 
