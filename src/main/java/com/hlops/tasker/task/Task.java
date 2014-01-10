@@ -12,8 +12,6 @@ import java.util.concurrent.Callable;
  */
 public interface Task<T> extends Callable<T>, Comparable<Task> {
 
-    void setTaskDescriptor(TaskDescriptor taskDescriptor);
-
     void beforeExecute(Thread t);
 
     void afterExecute(Throwable t);

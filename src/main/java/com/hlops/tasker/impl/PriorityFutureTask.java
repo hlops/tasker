@@ -10,7 +10,7 @@ import java.util.concurrent.FutureTask;
  * Date: 12/30/13
  * Time: 1:41 PM
  */
-public class PriorityFutureTask<T> extends FutureTask<T> implements Comparable {
+class PriorityFutureTask<T> extends FutureTask<T> implements Comparable {
 
     private Task<T> task;
 

@@ -1,6 +1,7 @@
 package com.hlops.tasker.impl;
 
 import com.hlops.tasker.QueueService;
+import com.hlops.tasker.task.CacheableTask;
 import com.hlops.tasker.task.Task;
 import com.hlops.tasker.task.impl.TaskImpl;
 import junit.framework.Assert;
@@ -15,7 +16,7 @@ import java.util.concurrent.Future;
  * Date: 12/28/13
  * Time: 3:40 PM
  */
-public class QueueServiceImplTest extends Assert {
+public class CacheableTaskTest extends Assert {
 
     private static final int poolSize = 10;
     private QueueService queueService;
@@ -26,22 +27,37 @@ public class QueueServiceImplTest extends Assert {
     }
 
     @Test
-    public void testTask() throws Exception {
+    public void testCacheableTask() throws Exception {
         Future[] futures = new Future[100];
         for (int i = 0; i < futures.length; i++) {
-            Task<String> task = new TaskImpl<String>() {
-                public String call() throws Exception {
-                    return "Hello!";
+            Task<Long> task = new MyCacheableTaskImpl<Long>() {
+                public Long call() throws Exception {
+                    return System.nanoTime();
                 }
             };
             futures[i] = queueService.executeTask(task);
         }
 
-        for (int i = 0; i < futures.length; i++) {
-            @SuppressWarnings({"unchecked"}) Future<String> future = futures[i];
+        long time = 0;
+        for (Future future : futures) {
             assertNotNull(future);
-            assertEquals("Hello!", future.get());
+            if (time == 0) {
+                time = (Long) future.get();
+            } else {
+                assertEquals(time, future.get());
+            }
         }
     }
 
+    abstract class MyCacheableTaskImpl<T> extends TaskImpl<T> implements CacheableTask<T> {
+
+        public Object getId() {
+            return "uniqueId";
+        }
+
+        public long getAliveTime() {
+            return 1000;
+        }
+
+    }
 }

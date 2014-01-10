@@ -1,7 +1,6 @@
 package com.hlops.tasker.task.impl;
 
 import com.hlops.tasker.task.Task;
-import com.hlops.tasker.task.TaskDescriptor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,15 +11,6 @@ import com.hlops.tasker.task.TaskDescriptor;
 public abstract class TaskImpl<T> implements Task<T> {
 
     private final long time = System.nanoTime();
-    private TaskDescriptor taskDescriptor;
-
-    protected TaskDescriptor getTaskDescriptor() {
-        return taskDescriptor;
-    }
-
-    public void setTaskDescriptor(TaskDescriptor taskDescriptor) {
-        this.taskDescriptor = taskDescriptor;
-    }
 
     public void beforeExecute(Thread t) {
     }
