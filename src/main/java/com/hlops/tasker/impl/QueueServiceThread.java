@@ -18,6 +18,7 @@ class QueueServiceThread extends Thread {
     };
 
     public QueueServiceThread(ThreadGroup group, Runnable r, String s, int i) {
+        super(group, r, s, i);
     }
 
     public Boolean getPoolSizeInflated() {

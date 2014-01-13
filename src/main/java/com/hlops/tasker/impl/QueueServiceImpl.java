@@ -39,10 +39,8 @@ public class QueueServiceImpl implements QueueService {
 
             @Override
             protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
-                System.out.println(callable);
                 checkPoolSize(true);
-                final PriorityFutureTask<T> task = new PriorityFutureTask<T>((Task<T>) callable);
-                return task;
+                return new PriorityFutureTask<T>((Task<T>) callable);
             }
         };
     }
@@ -69,23 +67,6 @@ public class QueueServiceImpl implements QueueService {
         return threadExecutor.submit(task);
     }
 
-    public void waitFor(Task... task) throws InterruptedException {
-        this.waitFor(0, task);
-    }
-
-    public void waitFor(long millis, Task... tasks) throws InterruptedException {
-        long t = System.currentTimeMillis();
-        for (Task task : tasks) {
-            long interval = millis - System.currentTimeMillis() + t;
-            if (interval < 0) {
-                // todo: arguments
-                throw new InterruptedException();
-            }
-            //task.join(interval);
-
-        }
-    }
-
     private void checkPoolSize(boolean isIncrement) {
         if (Thread.currentThread() instanceof QueueServiceThread) {
             if (isIncrement) {
@@ -100,9 +81,9 @@ public class QueueServiceImpl implements QueueService {
         }
     }
 
-    private void updatePoolSize(int n) {
-        System.out.println(n);
+    private synchronized void updatePoolSize(int n) {
         threadExecutor.setCorePoolSize(n);
+        threadExecutor.setMaximumPoolSize(n);
     }
 
     private <T> Object getId(Task<T> task) {

@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -18,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class WaitingTaskTest extends Assert {
 
-    private static final int poolSize = 11;
+    private static final int poolSize = 3;
     private QueueService queueService;
 
     @Before
@@ -35,15 +36,13 @@ public class WaitingTaskTest extends Assert {
             final int parentNumber = i;
             ParentTask task = new ParentTask("parent_" + parentNumber) {
                 public String call() throws Exception {
-/*
                     Future[] childFutures = new Future[10];
                     for (int i = 0; i < childFutures.length; i++) {
                         childFutures[i] = queueService.executeTask(new ChildTaskImpl("child_" + parentNumber + "_" + i, 10));
                     }
                     for (int i = 0; i < childFutures.length; i++) {
-                        assertEquals("child_" + parentNumber + "_" + i, childFutures[i].get());
+                        assertEquals("child_" + parentNumber + "_" + i, childFutures[i].get(5, TimeUnit.SECONDS));
                     }
-*/
                     return getName();
                 }
 
