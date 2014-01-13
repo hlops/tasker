@@ -12,5 +12,5 @@ import java.util.concurrent.Future;
  */
 public interface QueueService {
 
-    <T> Future<T> executeTask(Task<T> task);
+    <T> Future executeTask(Task<T> task);
 }

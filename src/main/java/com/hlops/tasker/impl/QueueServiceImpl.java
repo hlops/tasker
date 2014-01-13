@@ -38,9 +38,23 @@ public class QueueServiceImpl implements QueueService {
             }
 
             @Override
-            protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) {
+            protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable) throws TaskAlreadyInCacheException {
+                PriorityFutureTask<T> result = null;
+                Task<T> task = (Task<T>) callable;
+                Object id = getId(task);
+                if (id != null) {
+                    result = new PriorityFutureTask<T>((Task<T>) callable);
+                    Future cached = cache.putIfAbsent(id, result);
+                    if (cached != null) {
+                        throw new TaskAlreadyInCacheException(cached);
+                    }
+                }
+
                 checkPoolSize(true);
-                return new PriorityFutureTask<T>((Task<T>) callable);
+                if (result == null) {
+                    result = new PriorityFutureTask<T>((Task<T>) callable);
+                }
+                return result;
             }
         };
     }
@@ -53,15 +67,11 @@ public class QueueServiceImpl implements QueueService {
             if (taskFuture != null) {
                 return taskFuture;
             }
-            synchronized (cache) {
+            try {
+                return threadExecutor.submit(task);
+            } catch (TaskAlreadyInCacheException e) {
                 //noinspection unchecked
-                taskFuture = cache.get(id);
-                if (taskFuture != null) {
-                    return taskFuture;
-                }
-                Future<T> result = threadExecutor.submit(task);
-                cache.put(id, result);
-                return result;
+                return e.getCachedTask();
             }
         }
         return threadExecutor.submit(task);
